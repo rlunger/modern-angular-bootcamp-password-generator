@@ -2,16 +2,17 @@
   <div class="app-title">Password Generator</div>
   <div>
     <label>Password Length</label>
-    <input type="number" [(ngModel)]="passwordLength"/>
+    <input class="length" type="number" [min]="MinLength" [max]="MaxLength"  [(ngModel)]="passwordLength"/>
   </div>
   <div class="option-container">
     <div class="option-item" *ngFor="let option of options | keyvalue">
-      <input type="checkbox" [checked]="options[option.key]" (change)="setOption(option.key)" />
+      <input type="checkbox" [(ngModel)]="options[option.key]"/>
       <label>{{option.key}}</label>
     </div>
   </div>
   <div>
-    <button (click)="onSubmit()">Generate!</button>
+    <button [disabled]="FormNotValid" (click)="onSubmit()">Generate!</button>
+    <button (click)="reset()">Reset</button>
   </div>
   <div class="password">
     <label>{{password}}</label>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { isNullOrUndefined } from 'util';
+import { stringify } from 'querystring';
 
 @Component({
   selector: 'app-root',
@@ -10,80 +10,123 @@ import { isNullOrUndefined } from 'util';
 
 export class AppComponent {
 
-  ///////////////////////////////////
-  // Private Members
-  ///////////////////////////////////
-  private useLetters = 'Use Letters';
-  private useNumbers = 'Use Numbers';
-  private useSymbols = 'Use Symbols';
+  constructor() {
+    this.reset();
+  }
 
-  ///////////////////////////////////
-  // Bound Members
-  ///////////////////////////////////
-  password = '';
-  passwordLength = 8;
+  // Static Members
+  static useLetters = 'Use Letters';
+  static useNumbers = 'Use Numbers';
+  static useSymbols = 'Use Symbols';
 
-  options = {
-    [this.useLetters]: true,
-    [this.useNumbers]: true,
-    [this.useSymbols]: true,
+  static minLength = 6;
+  static maxLength = 32;
+
+
+  static defaultOptions = {
+    [AppComponent.useLetters]: true,
+    [AppComponent.useNumbers]: true,
+    [AppComponent.useSymbols]: true,
   };
 
-  ////////////////////////////////////
-  // Data Contributors
-  ////////////////////////////////////
-  contributors = [
+  static contributors = [
     {
-      name: this.useLetters, method: () => AppComponent.pickRandom('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
+      name: AppComponent.useLetters, method: () => AppComponent.pickRandom('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
     },
     {
-      name: this.useNumbers, method: () => AppComponent.pickRandom('0123456789')
+      name: AppComponent.useNumbers, method: () => AppComponent.pickRandom('0123456789')
     },
     {
-      name: this.useSymbols, method: () => AppComponent.pickRandom('!@#$%^*()')
+      name: AppComponent.useSymbols, method: () => AppComponent.pickRandom('!@#$%^*()')
     }
   ];
+  
+  // Static Methods //////////////////////
 
-  ////////////////////////////////////////////
-  // Static Methods
-  ////////////////////////////////////////////
-  static pickRandom = (charset: string) => charset.charAt(Math.floor(Math.random() * charset.length));
+  static pickRandom(charset: string) {
+  // Pick a random character from a string.
+    return charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+   
+  static contributorReducer (acc: string, curr: { method: () => string; }) {
+  // If the character doesn't have a value yet, set one.
+  // Otherwise, maybe overwrite it.
+    return (!acc || Math.random() > 0.5) ? curr.method() : acc;
+  }
 
-  ////////////////////////////////////////////
-  // Instance Methods
-  ////////////////////////////////////////////
+  // Instance Members ///////////////////
+  password : string;
+  passwordLength : number;
+  options : {};
+
+  // Instance Methods ////////////////////
+
   setOption(option: string) {
+  // Toggle checkbox options on or off.
     this.options[option] = !this.options[option];
   }
 
   onSubmit() {
-    const contributorReducer = (acc: any, curr: { method: () => string; }) => {
-      if (!acc || Math.random() > 0.5) {
-        return curr.method();
-      }
-
-      return acc;
-    };
-
-    const enabledContributors = this.contributors.filter(contributor => this.options[contributor.name]);
+  // Filter out the password character contributors
+  // based on selected options. Build a string of the 
+  // requested length out of enabled character set.
+    const enabledContributors = AppComponent.contributors.filter(c => this.options[c.name]);
 
     this.password = new Array(this.passwordLength)
       .fill(undefined)
-      .map(each => enabledContributors.reduce(contributorReducer, each))
+      .map(each => enabledContributors.reduce(AppComponent.contributorReducer, each))
       .join('');
   }
 
   onCopy() {
-    navigator.clipboard.writeText(this.getPassword());
+  // Send the generated password to the clipboard
+  // Don't write if empty (overwriting previously-generated password).
+    if (this.password) {
+      navigator.clipboard.writeText(this.password);
+    }
   }
 
-  getPassword() {
-    return this.password;
+  get FormNotValid() {
+  // Validate entries
+    return !(this.validOptions() && this.validLength());
+  }
+
+  validOptions() {
+  // At least one option must be selected
+    for (let opt in this.options) {
+      if (this.options[opt]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  validLength () {
+  // Password can't be empty or too long.
+    return (this.passwordLength >= AppComponent.minLength) 
+        && (this.passwordLength <= AppComponent.maxLength)
   }
 
   getClipboardClass() {
-    if (this.password === '') {
-      return 'hidden';
-    }
+  // Don't show the copy to clipboard button if 
+  // we don't have a password to copy.
+    return (this.password) ? '' : 'hidden';
   }
+
+  reset() {
+  // Set form back to original state.
+    this.password = '';
+    this.passwordLength = AppComponent.minLength;
+    this.options = { ... AppComponent.defaultOptions };
+  }
+
+  get MinLength() {
+    return AppComponent.minLength;
+  }
+
+  get MaxLength() {
+    return AppComponent.maxLength;
+  }
+
 }
