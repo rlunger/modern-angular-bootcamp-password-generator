@@ -21,7 +21,6 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
-
 .option-item {
     color: black;
     display: flex;
@@ -34,6 +33,32 @@ button {
     font-family: monospace;
     font-size: 13px;
     color: black;
+}
+
+@media screen and (max-width: 600px) {
+    .app-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+    label {
+        font-size: 24px;
+    }
+    input {
+        font-size: 28px;
+        margin-left: 10px;
+    }
+    button {
+        font-size: 28px;
+    }
+    .option-container {
+        min-height: 300px;
+        justify-content: space-evenly;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    .option-item {
+        font-size: 28px;
+    }
 }
 
 :disabled {
