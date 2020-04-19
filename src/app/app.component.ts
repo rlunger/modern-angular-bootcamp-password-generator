@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
-import { stringify } from 'querystring';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-
 
 export class AppComponent {
 
@@ -21,7 +19,6 @@ export class AppComponent {
 
   static minLength = 6;
   static maxLength = 32;
-
 
   static defaultOptions = {
     [AppComponent.useLetters]: true,
